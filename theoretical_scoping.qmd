@@ -1,0 +1,44 @@
+---
+title: "Theoretical (neutral)"
+format: html
+---
+
+```{r setup}
+
+library(untb)
+library(dplyr)
+library(ggplot2)
+
+```
+
+(January 10, 2023) After looking at a few different dimensions of the empirical side of this question (MACDB, Portal rodents, and the Portal plant timeseries), my sense is that there is not a clear and widespread signal in those data of the manipulated treatment consistently deviating from METE/FS more strongly than the control treatment. 
+
+But I have a question about how this behaves on the theoretical side. Do deviations from METE/FS correspond to, for example, trajectory/stability of a neutral simulation?
+
+Let's give that a shot.
+
+### Code up neutral simulation in R
+
+```{r}
+
+untb_sim <- untb(start = rep(1, 100), prob = 0.01, gens = 5000, keep = T)
+
+timestep_count <- function(sim_row) {
+  
+  simcount <- as.count(sim_row)
+  count_df <- data.frame(
+    species = names(simcount),
+    abund = as.numeric(simcount))
+  
+  
+}
+
+untb_counts <- apply(untb_sim, MARGIN = 1, FUN = timestep_count, simplify = F)
+
+untb_counts <- bind_rows(untb_counts, .id = "timestep")
+
+```
+
+### Calculate, for each timestep, deviation from METE and FS
+
+### Plot deviation from METE and FS
