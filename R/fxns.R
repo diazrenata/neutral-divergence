@@ -18,8 +18,8 @@ summarize_sad <- function(a_row) {
   
   return(data.frame(richness = richness,
                     abundance = abundance,
-                    hill1 = hill1,
-                    hill2 = hill2))
+                    fs_hill1 = hill1,
+                    fs_hill2 = hill2))
   
 }
 
@@ -50,6 +50,8 @@ fs_hills <- function(s, n, p_table, ndraws) {
   fs_hill2 <- hillR::hill_taxa(fs, q = 2)
 
   return(data.frame(
+    s = s,
+    n = n,
     fs_hill1 = fs_hill1,
     fs_hill2 = fs_hill2
   ))
@@ -62,7 +64,74 @@ mete_hills <- function(s, n, ndraws) {
   mete_sad <- meteR::sad(mete_esf)
   
   mete_sad_draws <- replicate(n = ndraws, sort(mete_sad$r(s)), simplify = T) %>%
-    as.data.frame()
+    t() 
+  
+  
+  mete_hill1 <- hillR::hill_taxa(mete_sad_draws, q = 1)
+  
+  mete_hill2 <- hillR::hill_taxa(mete_sad_draws, q = 2)
+  
+  
+  return(data.frame(
+    s = s,
+    n = n,
+    mete_hill1 = mete_hill1,
+    mete_hill2 = mete_hill2
+  ))
+  
+}
+
+
+compare_to_baselines <- function(a_row, p_table, ndraws = 100) {
+  
+  a_row <- as.numeric(a_row)
+  
+  # this stresses me out but will do for now
+  timestep = a_row[1]
+  s = a_row[2]
+  n = a_row[3]
+  hill1 = a_row[4]
+  hill2 = a_row[5]
+  
+  if(s == 1) {
+    
+    
+    fs_hill1_percentile <- NA 
+    fs_hill2_percentile <- NA
+    
+    mete_hill1_percentile <- NA
+    mete_hill2_percentile <- NA
+    
+  } else {
+  
+  fs_hill_values <- fs_hills(s, n, p_table, ndraws)
+  mete_hill_values <- mete_hills(s, n, ndraws)
+  
+  fs_hill1_percentile <- calc_percentile(hill1, fs_hill_values$fs_hill1)
+  fs_hill2_percentile <- calc_percentile(hill2, fs_hill_values$fs_hill2)
+  
+  mete_hill1_percentile <- calc_percentile(hill1, mete_hill_values$mete_hill1)
+  mete_hill2_percentile <- calc_percentile(hill2, mete_hill_values$mete_hill2)
+  }
+  
+  return(data.frame(
+    timestep = timestep,
+    s = s,
+    n = n,
+    hill1 = hill1,
+    hill2 = hill2,
+    fs_hill1_percentile = fs_hill1_percentile,
+    fs_hill2_percentile = fs_hill2_percentile,
+    mete_hill1_percentile = mete_hill1_percentile,
+    mete_hill2_percentile = mete_hill2_percentile
+  ))
+  
+}
+
+calc_percentile <- function(obs, compare) {
+  
+  return(mean(compare <= obs))
+  
 }
 
 #' plan
@@ -70,8 +139,8 @@ mete_hills <- function(s, n, ndraws) {
 #' 2. calculate max s and n, use this to create the p table x. just as easy to calc hills here. x
 #' 3. for each timestep x
 #'    1. draw from fs and calc  hill1 x
-#'    2. draw from mete and calchill1 IN PROGRESS
-#'    3. summarize hill percentiles
+#'    2. draw from mete and calchill1 x
+#'    3. summarize hill percentiles x 
 #' 4. aggregate over timesteps
 #' 
 #' to do this for repeated sims, you'll probably eventually want to condense the p table step. the more you can condense and reuse the p tables the faster the overall pipeline gets. 
