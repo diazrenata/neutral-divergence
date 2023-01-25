@@ -95,12 +95,18 @@ compare_to_baselines <- function(a_row, p_table, ndraws = 100) {
   
   if(s == 1) {
     
+    out <- data.frame(
+      timestep = timestep,
+      s = s,
+      n = n,
+      hill1 = hill1,
+      hill2 = hill2,
+      fs_hill1_percentile = NA,
+      fs_hill2_percentile = NA,
+      mete_hill1_percentile = NA,
+      mete_hill2_percentile = NA
+    )
     
-    fs_hill1_percentile <- NA 
-    fs_hill2_percentile <- NA
-    
-    mete_hill1_percentile <- NA
-    mete_hill2_percentile <- NA
     
   } else {
   
@@ -112,9 +118,15 @@ compare_to_baselines <- function(a_row, p_table, ndraws = 100) {
   
   mete_hill1_percentile <- calc_percentile(hill1, mete_hill_values$mete_hill1)
   mete_hill2_percentile <- calc_percentile(hill2, mete_hill_values$mete_hill2)
-  }
   
-  return(data.frame(
+  fs_hill1_envelope <- calc_envelope(fs_hill_values$fs_hill1) 
+  colnames(fs_hill1_envelope) <- paste0("fs_hill1_", colnames(fs_hill1_envelope))
+  
+  mete_hill1_envelope <- calc_envelope(mete_hill_values$mete_hill1)
+  colnames(mete_hill1_envelope) <- paste0("mete_hill1_", colnames(mete_hill1_envelope))
+  
+  
+  out <- data.frame(
     timestep = timestep,
     s = s,
     n = n,
@@ -124,13 +136,37 @@ compare_to_baselines <- function(a_row, p_table, ndraws = 100) {
     fs_hill2_percentile = fs_hill2_percentile,
     mete_hill1_percentile = mete_hill1_percentile,
     mete_hill2_percentile = mete_hill2_percentile
-  ))
+  )
+  
+  out <- cbind(out, fs_hill1_envelope)
+  
+  out <- cbind(out, mete_hill1_envelope)
+  }
+  
+  
+  return(out)
   
 }
 
 calc_percentile <- function(obs, compare) {
   
   return(mean(compare <= obs))
+  
+}
+
+calc_envelope <- function(vals) {
+  
+  lower_2p5 = quantile(vals, probs = .025)
+  lower_5 = quantile(vals, probs = .05)
+  upper_95 = quantile(vals, probs = .95)
+  upper_97p5 = quantile(vals, probs = .975)
+  
+  data.frame(
+    lower_2p5 = lower_2p5,
+    lower_5 = lower_5,
+    upper_95 = upper_95,
+    upper_97p5 = upper_97p5
+  )
   
 }
 
