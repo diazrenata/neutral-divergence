@@ -1,0 +1,32 @@
+Theta is 2vJ, where v is the probabilty of mutation and J is the size of the system. 
+
+However, estimating theta doesn't seem to give richness?
+
+https://rdrr.io/rforge/hubbell/man/E.S.html Function E.S in `hubbell` might. `hubbell` is written by J Oksanen (of vegan fame) but appears unpublished and stale (last update 2019)
+
+To install from R forge:
+install.packages("hubbell",repos="http://r-forge.r-project.org")
+
+Note from `hubbell` docs:
+Note
+
+Hubbell gives only an approximate equation for expected species number. The exact form and its variance were derived by J. Oksanen and may be unpublished.
+
+Hubbell's model for local community is based on wrong argumentation: Hubbell assumes falsely that his model is asymptotically similar to the classical Arrhenius model. Even with that model, the argumentation in deriving ω is invalid. Moreover, ω and θ are so strongly correlated (positively) that their estimates are very unreliable.
+
+
+----
+
+So my thinking is to try a net of J + v and therefore theta and S. First to explore how S varies over this landscape and then to explore how the relation to the FS varies over this landscape.
+
+For getting the size of the landscape...
+
+- v should vary from 0-1 in some increments. Maybe .001, .1, .5, .9 to start.
+- J should vary. Trivially small is important. The largest I've ever sampled successfully is 40,000 individuals; this depends somewhat on S. Maybe 50, 100, 1000, 10000, 40000?
+- This giving a combination of 20 parameter combinations to try at the prospective level.
+
+For sampling the landscape...
+
+- First we want to compute theta for each combination of J and v.
+- Then we want to compute estimated S for each theta. I think down the line this will be superceded by sampling so it doesn't have to be precise, but for scoping/heatmap purposes it's good to have the solved version. 
+
